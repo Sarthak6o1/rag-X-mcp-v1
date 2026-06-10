@@ -193,33 +193,36 @@ Expected response shape:
 
 ## Connect an MCP client
 
-Point your MCP host at:
+Point your MCP host at the deployed MCP endpoint for this service:
 
 ```
-http://<host>:4010/mcp
+${RAG_MCP_URL}
 ```
 
-Ensure `BACKEND_API_URL` resolves from the MCP process/container to the running backend (use container/service hostnames in Docker Compose, public/internal URLs in Cloud Run).
+Ensure `BACKEND_API_URL` resolves from the MCP process/container to the running backend. Keep deployment-specific addresses in environment variables or platform configuration, not in committed docs.
 
 ### LibreChat example
 
-In your LibreChat `librechat.yaml`:
+In `librechat.yaml`, add this under the top-level `mcpServers` key:
 
 ```yaml
 mcpServers:
-  rag:
+  knowledge-base:
     type: streamable-http
-    url: http://your-mcp-host:4010/mcp
+    url: ${RAG_MCP_URL}
+    timeout: 300000
 ```
+
+Set `RAG_MCP_URL` in the runtime environment where LibreChat starts. This keeps local, staging, and production addresses out of source control while still making the integration portable.
 
 No changes are required when admins upload via the admin portal — new documents appear in search after backend ingest completes.
 
 ### MCP client configuration checklist
 
-1. **Backend healthy** — `GET http://backend-host:8000/health` returns `healthy`.
+1. **Backend healthy** — the backend health endpoint returns `healthy`.
 2. **MCP server can reach backend** — `BACKEND_API_URL` is correct, no trailing slash.
-3. **MCP server healthy** — `GET http://mcp-host:4010/health` returns `healthy` with `backend_health` populated.
-4. **MCP client URL** — Set the host to `http://mcp-host:4010/mcp`.
+3. **MCP server healthy** — the MCP health endpoint returns `healthy` with `backend_health` populated.
+4. **MCP client URL** — Set LibreChat's `mcpServers.<name>.url` from `RAG_MCP_URL`.
 5. **JWT (if enabled)** — Same `JWT_SECRET` on backend and MCP server.
 6. **After uploads** — Optionally run `POST /api/graph/rebuild` on the backend for best retrieval.
 

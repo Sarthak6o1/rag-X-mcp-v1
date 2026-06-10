@@ -368,7 +368,7 @@ You should see `kb-test-onboarding` in the results.
 
 ### Step 5 — Query through MCP
 
-Open your MCP client (LibreChat, Cursor, etc.) and call:
+Open LibreChat or another MCP client and call:
 
 ```
 search_knowledge_base(query="How do I log in?")
@@ -377,6 +377,31 @@ search_knowledge_base(query="How do I log in?")
 You should get the same result, formatted as readable text.
 
 If all five steps succeed, the stack is wired up correctly.
+
+---
+
+## LibreChat integration
+
+LibreChat can call the RAG stack through the MCP service. Keep the service address outside the repository and pass it as an environment variable at runtime.
+
+Add an MCP server entry to `librechat.yaml`:
+
+```yaml
+mcpServers:
+  knowledge-base:
+    type: streamable-http
+    url: ${RAG_MCP_URL}
+    timeout: 300000
+```
+
+Operational flow:
+
+1. Run the backend and MCP service.
+2. Set `BACKEND_API_URL` for the MCP service so it can reach the backend.
+3. Set `RAG_MCP_URL` for LibreChat so it can reach the MCP service.
+4. Restart LibreChat and enable the `knowledge-base` MCP tools.
+
+Do not commit live service addresses, OAuth credentials, JWT secrets, or deployment-specific hostnames.
 
 ---
 
