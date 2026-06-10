@@ -1,0 +1,22 @@
+# Cloud Build: build image and push to Artifact Registry.
+# Submit from admin-portal:
+#   gcloud builds submit --config=cloudbuild.yaml --region=REGION .
+#
+# Substitutions (set in Cloud Build trigger or CLI):
+#   _AR_REPO, _IMAGE, _REGION
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:$SHORT_SHA
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:latest
+      - .
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:$SHORT_SHA
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:latest
+substitutions:
+  _AR_REPO: docker
+  _IMAGE: rag-admin-portal
+  _REGION: us-central1
