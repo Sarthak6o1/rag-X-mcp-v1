@@ -384,7 +384,7 @@ If all five steps succeed, the stack is wired up correctly.
 
 LibreChat can call the RAG stack through the MCP service. Keep the service address outside the repository and pass it as an environment variable at runtime.
 
-Add an MCP server entry to `librechat.yaml`:
+Use `examples/librechat.rag-mcp.example.yaml` as the sanitized reference file. In an existing `librechat.yaml`, the important pieces are the top-level `mcpServers` block and, optionally, a `modelSpecs` preset for safe system instructions.
 
 ```yaml
 mcpServers:
@@ -394,6 +394,23 @@ mcpServers:
     timeout: 300000
 ```
 
+Optional system instructions can live in `modelSpecs.list[].preset.promptPrefix`. Keep them generic and privacy-safe:
+
+```yaml
+modelSpecs:
+  list:
+    - name: "rag-knowledge-assistant"
+      label: "RAG Knowledge Assistant"
+      preset:
+        endpoint: "${LIBRECHAT_RAG_ENDPOINT}"
+        model: "${LIBRECHAT_RAG_MODEL}"
+        promptPrefix: |
+          Use the knowledge-base MCP tools for indexed documents.
+          Do not reveal secrets, credentials, internal hostnames, live URLs, or
+          private company/customer names unless they appear in retrieved context
+          and are necessary to answer the user.
+```
+
 Operational flow:
 
 1. Run the backend and MCP service.
@@ -401,7 +418,7 @@ Operational flow:
 3. Set `RAG_MCP_URL` for LibreChat so it can reach the MCP service.
 4. Restart LibreChat and enable the `knowledge-base` MCP tools.
 
-Do not commit live service addresses, OAuth credentials, JWT secrets, or deployment-specific hostnames.
+Do not commit live service addresses, OAuth credentials, JWT secrets, deployment-specific hostnames, or full production `librechat.yaml` files.
 
 ---
 

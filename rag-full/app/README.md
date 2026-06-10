@@ -203,7 +203,7 @@ Ensure `BACKEND_API_URL` resolves from the MCP process/container to the running 
 
 ### LibreChat example
 
-In `librechat.yaml`, add this under the top-level `mcpServers` key:
+See `../../examples/librechat.rag-mcp.example.yaml` for a sanitized reference config. In an existing `librechat.yaml`, add this under the top-level `mcpServers` key:
 
 ```yaml
 mcpServers:
@@ -214,6 +214,8 @@ mcpServers:
 ```
 
 Set `RAG_MCP_URL` in the runtime environment where LibreChat starts. This keeps local, staging, and production addresses out of source control while still making the integration portable.
+
+If you want a reusable LibreChat assistant with system instructions, define a `modelSpecs` preset and put the instructions in `preset.promptPrefix`. Keep the prompt generic: tell the model to use the `knowledge-base` MCP tools, avoid secrets/live URLs, and avoid naming private companies or customers unless that information appears in retrieved context and is necessary.
 
 No changes are required when admins upload via the admin portal — new documents appear in search after backend ingest completes.
 

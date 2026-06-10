@@ -2,6 +2,11 @@
 .env.*
 !.env.example
 
+# Local LibreChat deployments can contain private service URLs and provider config.
+librechat.yaml
+librechat.*.yaml
+!examples/*.yaml
+
 __pycache__/
 *.py[cod]
 .pytest_cache/

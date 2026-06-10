@@ -1,0 +1,72 @@
+# Minimal LibreChat configuration for the RAG MCP service.
+#
+# Keep real hostnames, tokens, OAuth details, provider keys, and customer-specific
+# instructions in environment variables or private deployment config.
+version: 1.2.1
+cache: true
+
+interface:
+  customWelcome: "Ask questions against your private knowledge base."
+  fileSearch: true
+  endpointsMenu: true
+  modelSelect: true
+  parameters: true
+  sidePanel: true
+  presets: true
+  prompts: true
+  bookmarks: true
+  agents: true
+  fileCitations: true
+
+# The MCP block is the only LibreChat wiring required for this RAG service.
+# Set RAG_MCP_URL where LibreChat runs, for example in Docker Compose or a
+# platform secret/env configuration. Do not commit a live service URL.
+mcpServers:
+  knowledge-base:
+    type: streamable-http
+    url: ${RAG_MCP_URL}
+    timeout: 300000
+
+# Optional: expose a clean model preset with safe system instructions.
+# Replace endpoint/model with whichever provider is already configured in your
+# private LibreChat deployment. Keep provider API keys in environment variables.
+modelSpecs:
+  enforce: false
+  prioritize: true
+  list:
+    - name: "rag-knowledge-assistant"
+      label: "RAG Knowledge Assistant"
+      description: "Uses the RAG MCP tools to answer from indexed documents."
+      default: true
+      preset:
+        endpoint: "${LIBRECHAT_RAG_ENDPOINT}"
+        model: "${LIBRECHAT_RAG_MODEL}"
+        temperature: 0.2
+        greeting: |
+          I can answer questions using the connected knowledge base.
+        promptPrefix: |
+          You are a retrieval-augmented assistant connected to a private
+          knowledge base through MCP tools.
+
+          Use the knowledge-base MCP tools when the user asks about indexed
+          documents, procedures, policies, project notes, or uploaded content.
+
+          Security and privacy rules:
+          - Do not reveal secrets, tokens, credentials, internal hostnames, or
+            deployment URLs.
+          - Do not mention any company, customer, vendor, or private project
+            name unless it is present in the retrieved context and relevant to
+            the user's question.
+          - If retrieved context is missing or weak, say what is missing instead
+            of inventing an answer.
+          - Prefer concise answers with citations or source names when the MCP
+            tool response includes them.
+          - Treat uploaded documents as confidential user-provided context.
+
+          Answer style:
+          - Start with the direct answer.
+          - Then include the supporting details from retrieved context.
+          - Call out assumptions and uncertainty clearly.
+
+# Keep model/provider endpoint definitions in your private LibreChat config.
+# This public example intentionally omits API keys and live provider URLs.
