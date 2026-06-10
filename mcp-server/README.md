@@ -1,6 +1,6 @@
 # RAG MCP Server
 
-**FastMCP** server that exposes the RAG knowledge base as **MCP tools** for AI clients (LibreChat, Cursor, Claude Desktop, ChatGPT custom connectors, etc.). Every tool forwards to the FastAPI backend in `backend` — this service does no embedding or storage of its own.
+**FastMCP** server that exposes the RAG knowledge base as **MCP tools** for AI clients (LibreChat, Claude Desktop, ChatGPT custom connectors, and other MCP hosts). Every tool forwards to the FastAPI backend in `backend` — this service does no embedding or storage of its own.
 
 Documents enter the knowledge base via the [admin portal](../admin-portal/README.md) or direct `POST /api/ingest` on the backend — this service only **reads** the indexed content.
 
@@ -31,7 +31,7 @@ Part of [RAG X MCP](../README.md).
 ## Role in the stack
 
 ```
-AI client (LibreChat / Cursor / Claude Desktop / MCP host)
+AI client (LibreChat / Claude Desktop / MCP host)
         │  MCP HTTP transport (/mcp)
         ▼
   mcp-server    ← this service (FastMCP, port 4010)

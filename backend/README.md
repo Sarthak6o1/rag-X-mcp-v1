@@ -371,7 +371,7 @@ curl -X POST http://localhost:8000/api/graph/rebuild \
 
 1. **Ingest** documents via `POST /api/ingest` or the [admin portal](../admin-portal/README.md) upload UI. Include `display_title`, `relative_path`, and `tree` when available — they make the stage-0 filter and tree-overlap edges far more useful.
 2. **Rebuild graph** with `POST /api/graph/rebuild` after a bulk ingest (or once a day in production).
-3. **Query** with `POST /api/query/hybrid` for production retrieval, or via [MCP tools](../mcp-server/README.md) from LibreChat/Cursor.
+3. **Query** with `POST /api/query/hybrid` for production retrieval, or via [MCP tools](../mcp-server/README.md) from LibreChat or another MCP host.
 4. **Inspect** the KB with `GET /api/graph/tree`, `GET /api/documents`, or `POST /api/resolve-file-ids`.
 
 ---

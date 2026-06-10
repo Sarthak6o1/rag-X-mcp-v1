@@ -80,7 +80,7 @@ A thin **FastMCP** wrapper around the backend. It does no embedding or storage o
 
 Why it exists:
 
-- AI clients like **LibreChat**, **Cursor**, **Claude Desktop**, etc. natively speak MCP.
+- AI clients like **LibreChat**, **Claude Desktop**, and other MCP hosts natively speak MCP.
 - They can discover and call tools (`search_knowledge_base`, `list_documents`, …) without a custom integration.
 - It centralizes JWT generation so individual clients never see the secret.
 
@@ -183,13 +183,13 @@ Each service lives in its **own top-level folder**. There is no nesting of `mcp-
                                │ POST /api/ingest
                                ▼
 ┌─────────────────────┐   REST    ┌─────────────────────┐
-│  MCP client         │◄─────────►│  backend   │  :8000
-│  LibreChat, Cursor  │  + JWT?   │  ChromaDB + graph   │
+│  MCP client         │◄─────────►│  backend            │  :8000
+│  LibreChat / host   │  + JWT?   │  ChromaDB + graph   │
 └──────────┬──────────┘           └──────────▲──────────┘
            │ MCP HTTP (/mcp)                 │
            ▼                                 │
 ┌─────────────────────┐                      │
-│  mcp-server       │──────────────────────┘
+│  mcp-server         │──────────────────────┘
 │  FastMCP · :4010    │  search / list / graph tools
 └─────────────────────┘
 ```
