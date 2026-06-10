@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.env
+.venv/
+vector_db/
+*.egg-info/
+.pytest_cache/
+.DS_Store
+
+# Runtime knowledge-base artifacts (see data/README.md — rebuild via ingest + graph/rebuild)
+data/kb_manifest.json
+data/form_graph.json
