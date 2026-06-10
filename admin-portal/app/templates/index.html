@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>Library — Add files</title>
+  <style>
+    :root {
+      --void: #000000;
+      --surface-0: #0d0d0f;
+      --surface-1: #1c1c1e;
+      --surface-2: #2c2c2e;
+      --surface-glass: rgba(28, 28, 30, 0.65);
+      --label: #f5f5f7;
+      --secondary: #a1a1a6;
+      --tertiary: #6e6e73;
+      --quat: #48484a;
+      --line: rgba(255, 255, 255, 0.1);
+      --line-soft: rgba(255, 255, 255, 0.06);
+      --accent: #0a84ff;
+      --accent-bright: #64b5f6;
+      --accent-press: #409cff;
+      --red: #ff453a;
+      --green: #32d74b;
+      --radius: 12px;
+      --radius-lg: 20px;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--label);
+      background: var(--void);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background:
+        radial-gradient(ellipse 120% 60% at 50% -15%, #1a2a3a 0%, transparent 50%),
+        radial-gradient(ellipse 80% 50% at 100% 50%, #1a1a2e 0%, transparent 45%),
+        var(--void);
+    }
+    .content {
+      width: 100%;
+      max-width: 30rem;
+      margin: 0 auto;
+    }
+    header {
+      padding: 1.75rem 1.25rem 0.5rem;
+    }
+    @media (min-width: 640px) {
+      header { padding: 2.25rem 1.5rem 0.5rem; }
+    }
+    .eyebrow {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--tertiary);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-size: 1.625rem;
+      font-weight: 600;
+      letter-spacing: -0.035em;
+      line-height: 1.12;
+      margin: 0;
+    }
+    @media (min-width: 640px) {
+      h1 { font-size: 1.875rem; }
+    }
+    .lede {
+      margin: 0.75rem 0 0;
+      font-size: 1.0625rem;
+      line-height: 1.5;
+      color: var(--secondary);
+      font-weight: 400;
+    }
+    main { flex: 1; padding: 0 1.25rem 1.5rem; }
+    .panel {
+      background: var(--surface-glass);
+      backdrop-filter: blur(32px) saturate(1.2);
+      -webkit-backdrop-filter: blur(32px) saturate(1.2);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line-soft);
+      box-shadow: 0 0 0 0.5px var(--line-soft), 0 20px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    .panel-pad { padding: 1.35rem 1.25rem 1.4rem; }
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--label);
+      margin: 0 0 0.75rem;
+    }
+    .callout {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: var(--secondary);
+      background: rgba(10, 132, 255, 0.08);
+      border: 1px solid rgba(10, 132, 255, 0.2);
+      padding: 0.85rem 0.95rem;
+      border-radius: var(--radius);
+      margin: 0 0 1.2rem;
+    }
+    .field { margin-top: 1.05rem; }
+    .field:first-of-type { margin-top: 0; }
+    .field-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--label);
+    }
+    .field-hint {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--tertiary);
+      margin-top: 0.2rem;
+      line-height: 1.4;
+    }
+    input[type="text"] {
+      width: 100%;
+      margin-top: 0.4rem;
+      padding: 0.65rem 0.75rem;
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--label);
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    input[type="text"]::placeholder { color: var(--quat); }
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.22);
+    }
+    .file-wrap:focus-within .drop {
+      border-color: var(--accent);
+      background: rgba(10, 132, 255, 0.06);
+    }
+    .drop {
+      margin-top: 0.4rem;
+      border: 1.5px dashed var(--line);
+      border-radius: 12px;
+      padding: 1.5rem 1rem;
+      background: rgba(0, 0, 0, 0.2);
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .file-wrap:focus-within .drop {
+      border-color: var(--accent);
+      background: rgba(10, 132, 255, 0.06);
+    }
+    .drop-prompt {
+      font-size: 0.8rem;
+      color: var(--tertiary);
+      margin-bottom: 0.6rem;
+    }
+    input[type="file"] {
+      width: 100%;
+      font-size: 0.8rem;
+      color: var(--secondary);
+      cursor: pointer;
+    }
+    input[type="file"]::file-selector-button {
+      font-family: var(--font);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      margin-right: 0.65rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--surface-1);
+      color: var(--label);
+      cursor: pointer;
+    }
+    a.btn { text-decoration: none; }
+    .btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin-top: 1.4rem;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 500;
+      font-family: inherit;
+      letter-spacing: -0.015em;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      transition: background 0.15s ease, transform 0.12s ease, opacity 0.15s ease;
+    }
+    .btn:hover:not(:disabled) { background: var(--accent-press); }
+    .btn:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+    .btn:active:not(:disabled) { transform: scale(0.985); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .banner { font-size: 0.9rem; line-height: 1.45; margin: 0 0 1.1rem; }
+    .banner--flush { margin-bottom: 0; }
+    .banner--intro { margin: 0 0 1.1rem; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--secondary);
+      background: var(--surface-1);
+      border: 1px solid var(--line);
+      border-radius: 100px;
+      padding: 0.35rem 0.7rem;
+      margin: 0 0 0.6rem;
+    }
+    .banner.dev {
+      color: var(--secondary);
+      background: var(--surface-1);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0.75rem 0.9rem;
+    }
+    .banner.ok { color: var(--secondary); }
+    .banner.ok a { color: var(--accent-bright); }
+    .err { color: #ff8a80; }
+    .result-line {
+      margin-top: 1.1rem;
+      padding-top: 1.1rem;
+      border-top: 1px solid var(--line);
+    }
+    .result-line[hidden] { display: none !important; }
+    .result-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--tertiary);
+      margin: 0 0 0.4rem;
+    }
+    #result {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0.8rem 0.9rem;
+      border-radius: 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      color: var(--secondary);
+    }
+    #result.muted { color: var(--tertiary); }
+    #result.ok {
+      color: #d1f2d4;
+      background: rgba(50, 215, 75, 0.1);
+      border-color: rgba(50, 215, 75, 0.25);
+    }
+    #result.err {
+      color: #ffd4cf;
+      background: rgba(255, 69, 58, 0.1);
+      border-color: rgba(255, 69, 58, 0.25);
+    }
+    a { color: var(--accent-bright); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    footer {
+      text-align: center;
+      padding: 0.5rem 1.25rem 1.75rem;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      color: var(--tertiary);
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="content">
+    <header>
+      <span class="eyebrow">Document library</span>
+      <h1>Add a file</h1>
+      <p class="lede">Your team can search this in chat once it’s ready. One upload is all you need.</p>
+    </header>
+
+    <main>
+  {% if dev_mode %}
+  <p class="banner dev"><strong>Tryout</strong> — you’re not fully signed in. Don’t use real or sensitive information.</p>
+  {% endif %}
+
+  {% if email and not allowed and not dev_mode %}
+  <div class="panel">
+    <div class="panel-pad">
+      <p class="err banner">This page isn’t available for <strong>{{ email }}</strong>. Someone with admin access for your org needs to add you.</p>
+      <p class="banner banner--flush"><a href="/logout">Sign out</a></p>
+    </div>
+  </div>
+  {% elif not email and not allowed and not dev_mode %}
+  <div class="panel">
+    <div class="panel-pad">
+      <p class="banner banner--intro">Sign in to add files to the library.</p>
+      {% if login_url %}
+      <a href="{{ login_url }}" class="btn">Sign in with Google</a>
+      {% else %}
+      <p class="err">Sign-in isn’t set up on this app yet. Please contact the person who manages it for your org.</p>
+      {% endif %}
+    </div>
+  </div>
+  {% elif not allowed and dev_mode %}
+  <div class="panel">
+    <div class="panel-pad">
+      <p class="err">In tryout mode, this address isn’t allowed. Ask the person who runs the app to add it to the list, or check the test settings.</p>
+    </div>
+  </div>
+  {% else %}
+  <span class="chip">Signed in as {{ email }}{% if not dev_mode %} · <a href="/logout" style="color:inherit">Sign out</a>{% endif %}</span>
+
+  <p class="section-title" style="margin-top:0.25rem;">New upload</p>
+  <div class="panel">
+    <div class="panel-pad">
+      <p class="callout">Use PDF, Word, Excel, PowerPoint, text, and other common types—same as the main library. For video, you only need the video: spoken words are turned into text in the background when needed.</p>
+
+      <form id="up">
+        <div class="field file-wrap" style="margin-top:0">
+          <span class="field-label">File</span>
+          <span class="field-hint">What should people be able to look up? Pick one file at a time.</span>
+          <div class="drop">
+            <div class="drop-prompt">Drop here, or choose from your device</div>
+            <input type="file" name="file" id="file" required accept="{{ upload_accept }}" />
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Display name <span class="field-hint" style="display:inline;margin:0">(optional)</span></span>
+          <span class="field-hint">How it will read in search. If you leave this empty, we use the file’s name.</span>
+          <input type="text" name="display_title" id="display_title" placeholder="e.g. Annual leave policy" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <span class="field-label">Folder <span class="field-hint" style="display:inline;margin:0">(optional)</span></span>
+          <span class="field-hint">A simple label to group files, e.g. Human resources or Q1 review.</span>
+          <input type="text" name="relative_path" id="relative_path" placeholder="Human resources" autocomplete="off" />
+        </div>
+
+        <button type="submit" class="btn" id="btn-go">Add to library</button>
+      </form>
+      <div id="result-wrap" class="result-line" hidden>
+        <p class="result-label">Status</p>
+        <p id="result" class="muted" role="status"></p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+    </main>
+    <footer>
+      If it doesn’t finish, wait a bit and try again, or get help from your help desk or IT.
+    </footer>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const form = document.getElementById("up");
+      const resultWrap = document.getElementById("result-wrap");
+      const out = document.getElementById("result");
+      if (!form || !out) return;
+      function friendlyError(status) {
+        if (status === 401) return "Please sign in, then try again.";
+        if (status === 403) return "You can’t add files on this page with your current account.";
+        if (status === 400) return "That file didn’t work. It may be the wrong type, empty, or unreadable. Try a different file.";
+        if (status === 502) return "The service is temporarily unavailable. Try again shortly.";
+        if (status === 0) return "Check your network connection, then try again.";
+        return "Something went wrong. Try again, or ask your help contact if it keeps happening.";
+      }
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("btn-go");
+        if (resultWrap) resultWrap.removeAttribute("hidden");
+        out.textContent = "Working on it…";
+        out.className = "muted";
+        btn.disabled = true;
+        const file = document.getElementById("file").files[0];
+        if (!file) {
+          out.textContent = "Start by choosing a file.";
+          out.className = "err";
+          btn.disabled = false;
+          return;
+        }
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("display_title", document.getElementById("display_title").value);
+        fd.append("relative_path", document.getElementById("relative_path").value);
+        try {
+          const r = await fetch("/upload", { method: "POST", body: fd, credentials: "same-origin" });
+          if (r.ok) {
+            let msg = "Done. Your file is in the library.";
+            const raw = await r.text();
+            try {
+              const data = JSON.parse(raw);
+              if (data && typeof data.message === "string" && data.message.trim()) msg = data.message.trim();
+            } catch (_) { /* keep default */ }
+            out.className = "ok";
+            out.textContent = msg;
+            return;
+          }
+          const raw = await r.text();
+          let errText = raw;
+          try {
+            const j = JSON.parse(raw);
+            if (j && j.detail != null) {
+              const d = j.detail;
+              errText = Array.isArray(d)
+                ? d.map((x) => (x && typeof x === "object" && "msg" in x ? x.msg : String(x))).join(" ")
+                : String(d);
+            }
+          } catch (_) { /* use raw */ }
+          if (/unsupported|empty|transcript|decode|read error|no usable text|automatic captions|transcribe|speech/i.test(errText) || r.status === 400) {
+            out.className = "err";
+            if (/speech|transcribe|caption|video|audio/i.test(errText)) {
+              out.textContent = "We couldn’t get speech from that file. Try a clearer recording, a shorter file, or ask for help with setup.";
+            } else {
+              out.textContent = friendlyError(400);
+            }
+            return;
+          }
+          if (/unreachable|connect|refused|timeout|502/i.test(errText) || r.status === 502) {
+            out.className = "err";
+            out.textContent = friendlyError(502);
+            return;
+          }
+          out.className = "err";
+          out.textContent = friendlyError(r.status);
+        } catch (err) {
+          out.className = "err";
+          out.textContent = friendlyError(0);
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

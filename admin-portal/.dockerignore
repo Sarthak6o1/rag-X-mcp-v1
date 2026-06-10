@@ -1,0 +1,11 @@
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.env
+.git
+.gitignore
+.runtime
+*.md
+start-ngrok.ps1
+start-ngrok.bat
