@@ -28,29 +28,41 @@ The project is organized as three independently deployable services. They commun
 ## Table of contents
 
 1. [Key capabilities](#key-capabilities)
-2. [What each service does](#what-each-service-does)
-3. [Repository layout](#repository-layout)
-4. [System architecture](#system-architecture)
-5. [Glossary](#glossary)
-6. [Prerequisites](#prerequisites)
-7. [Quick start (local, all three services)](#quick-start-local-all-three-services)
-8. [End-to-end tutorial](#end-to-end-tutorial)
-9. [LibreChat integration](#librechat-integration)
-10. [Service communication](#service-communication)
-11. [Docker Compose (local full stack)](#docker-compose-local-full-stack)
-12. [Authentication and security](#authentication-and-security)
-13. [Shared code sync](#shared-code-sync-important)
-14. [Component documentation](#component-documentation)
-15. [Backend API summary](#backend-api-summary)
-16. [MCP tools summary](#mcp-tools-summary)
-17. [Admin portal summary](#admin-portal-summary)
-18. [Typical workflow](#typical-workflow)
-19. [Production deployment](#production-deployment)
-20. [Troubleshooting](#troubleshooting)
-21. [Tech stack](#tech-stack)
-22. [Repository conventions](#repository-conventions)
-23. [FAQ](#faq)
-24. [License](#license)
+2. [What this demonstrates](#what-this-demonstrates)
+3. [What each service does](#what-each-service-does)
+4. [Repository layout](#repository-layout)
+5. [System architecture](#system-architecture)
+6. [Glossary](#glossary)
+7. [Prerequisites](#prerequisites)
+8. [Quick start (local, all three services)](#quick-start-local-all-three-services)
+9. [End-to-end tutorial](#end-to-end-tutorial)
+10. [LibreChat integration](#librechat-integration)
+11. [Service communication](#service-communication)
+12. [Docker Compose (local full stack)](#docker-compose-local-full-stack)
+13. [Authentication and security](#authentication-and-security)
+14. [Shared code sync](#shared-code-sync-important)
+15. [Component documentation](#component-documentation)
+16. [Backend API summary](#backend-api-summary)
+17. [MCP tools summary](#mcp-tools-summary)
+18. [Admin portal summary](#admin-portal-summary)
+19. [Typical workflow](#typical-workflow)
+20. [Production deployment](#production-deployment)
+21. [Troubleshooting](#troubleshooting)
+22. [Tech stack](#tech-stack)
+23. [Repository conventions](#repository-conventions)
+24. [FAQ](#faq)
+25. [License](#license)
+
+---
+
+## What this demonstrates
+
+This repository focuses on the engineering shape of a small RAG platform:
+
+- A retrieval API that separates ingestion, graph building, and query execution.
+- An MCP layer that keeps AI clients decoupled from backend internals.
+- An admin workflow for adding documents without changing the client integration.
+- A deployment-friendly structure where runtime data and private configuration stay outside Git.
 
 ---
 
