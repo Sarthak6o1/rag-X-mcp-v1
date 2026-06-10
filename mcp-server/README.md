@@ -219,6 +219,14 @@ If you want a reusable LibreChat assistant with system instructions, define a `m
 
 No changes are required when admins upload via the admin portal — new documents appear in search after backend ingest completes.
 
+### Client setup checklist
+
+- Start the backend first and verify its health endpoint.
+- Start this MCP server with `BACKEND_API_URL` pointing at the backend.
+- Configure the client with the MCP URL ending in `/mcp`.
+- If backend JWT auth is enabled, use the same `JWT_SECRET` for backend and MCP server.
+- After bulk document uploads, rebuild the graph before testing retrieval quality.
+
 ### MCP client configuration checklist
 
 1. **Backend healthy** — the backend health endpoint returns `healthy`.
