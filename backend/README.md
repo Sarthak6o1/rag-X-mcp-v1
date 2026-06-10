@@ -75,6 +75,13 @@ The pipeline narrows the candidate set before vector search to improve both qual
 
 If stage-0 returns nothing strong, the pipeline transparently **falls back to searching all documents** and records a `filter_note` in the response.
 
+### Retrieval design notes
+
+- The stage-0 filter is intentionally cheap and metadata-driven, so broad searches avoid scanning every document unless needed.
+- Graph expansion runs before vector search to pull nearby documents into scope when filenames or section titles are related.
+- Tree hints preserve document structure by adding relevant section titles to the embedding query.
+- The response includes filter and graph notes so retrieval behavior can be inspected during tuning.
+
 ### Knowledge graph edge types
 
 Built by `POST /api/graph/rebuild` (see `rag_pipeline/graph_builder.py`):
