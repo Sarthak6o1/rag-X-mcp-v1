@@ -1,6 +1,6 @@
 """
 Extract plain text to match what ``POST /api/ingest`` expects.
-Mirror behavior of a bulk run on ``backend-full`` (same page_index/trees, same extraction choices).
+Mirror behavior of a bulk run on ``backend`` (same page_index/trees, same extraction choices).
 
 **Keep in sync** with your backend pipeline when you change supported types or extractors.
 """

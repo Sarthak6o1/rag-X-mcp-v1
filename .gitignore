@@ -5,7 +5,7 @@
 # Local LibreChat deployments can contain private service URLs and provider config.
 librechat.yaml
 librechat.*.yaml
-!examples/*.yaml
+!sample-configs/*.yaml
 
 __pycache__/
 *.py[cod]

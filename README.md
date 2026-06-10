@@ -6,8 +6,8 @@ The project is organized as three independently deployable services. They commun
 
 | Service | Path | Default port | Role |
 |---------|------|--------------|------|
-| **RAG backend** | `backend-full/app/` | `8000` | FastAPI service for ingestion, embeddings, vector search, and graph expansion |
-| **MCP server** | `rag-full/app/` | `4010` | FastMCP gateway that exposes retrieval tools to AI clients |
+| **RAG backend** | `backend/` | `8000` | FastAPI service for ingestion, embeddings, vector search, and graph expansion |
+| **MCP server** | `mcp-server/` | `4010` | FastMCP gateway that exposes retrieval tools to AI clients |
 | **Admin portal** | `admin-portal/` | `8088` | Upload UI that extracts document text and calls the backend ingest API |
 
 > This repository is the **source of truth for application code and sanitized examples only**. Live URLs, credentials, provider keys, OAuth settings, and environment-specific runtime configuration belong in private deployment settings, not in Git.
@@ -56,7 +56,7 @@ The project is organized as three independently deployable services. They commun
 
 ## What each service does
 
-### Backend (`backend-full/app`)
+### Backend (`backend`)
 
 The **core API and data store**. It is the single source of truth for the knowledge base.
 
@@ -74,7 +74,7 @@ Responsibilities:
 
 **Consumers:** MCP server (read), admin portal (write), any other HTTP caller.
 
-### MCP server (`rag-full/app`)
+### MCP server (`mcp-server`)
 
 A thin **FastMCP** wrapper around the backend. It does no embedding or storage of its own — every tool call is forwarded to the backend.
 
@@ -109,43 +109,41 @@ What it does on each upload:
 rag-X-mcp-v1/
 ├── README.md                     ← you are here (platform overview)
 ├── .gitignore                    ← repo-wide ignores (.env, .venv, vector_db, etc.)
-├── examples/
+├── sample-configs/
 │   └── librechat.rag-mcp.example.yaml
-├── backend-full/
-│   └── app/                      ← FastAPI RAG API
-│       ├── README.md             ← backend-specific docs (API reference)
-│       ├── main.py               ← app factory, CORS, startup, /health
-│       ├── config.py             ← env-driven settings
-│       ├── auth.py               ← JWT verification
-│       ├── vector_store.py       ← ChromaDB read/write
-│       ├── graph_store.py        ← graph nodes/edges on disk
-│       ├── db.py                 ← shared DB helpers
-│       ├── Dockerfile
-│       ├── requirements.txt
-│       ├── routes/
-│       │   ├── ingest.py         ← POST /api/ingest, DELETE
-│       │   ├── query.py          ← /api/query, /api/query/hybrid, catalog, graph
-│       │   └── graph_rebuild.py  ← POST /api/graph/rebuild
-│       ├── rag_pipeline/
-│       │   ├── prompt_filter.py  ← stage-0 fuzzy file_id ranking
-│       │   ├── form_graph.py     ← graph load + expansion
-│       │   ├── graph_builder.py  ← folder / semantic / tree edge construction
-│       │   ├── tree_text.py      ← outline-augmented query helper
-│       │   ├── page_index.py     ← section tree extraction
-│       │   ├── manifest_io.py
-│       │   └── slug_file_id.py   ← semantic file_id builder
-│       ├── services/
-│       │   ├── chunker.py        ← text splitting
-│       │   └── embeddings.py     ← Sentence Transformers wrapper
-│       └── data/
-│           └── README.md         ← KB ingestion steps (manifest, graph, vector_db)
-├── rag-full/
-│   └── app/                      ← FastMCP server
-│       ├── README.md             ← MCP server docs (tool reference)
-│       ├── Dockerfile
-│       ├── requirements.txt
-│       └── src/
-│           └── main.py           ← FastMCP tools + health routes
+├── backend/
+│   ├── README.md                 ← backend-specific docs (API reference)
+│   ├── main.py                   ← app factory, CORS, startup, /health
+│   ├── config.py                 ← env-driven settings
+│   ├── auth.py                   ← JWT verification
+│   ├── vector_store.py           ← ChromaDB read/write
+│   ├── graph_store.py            ← graph nodes/edges on disk
+│   ├── db.py                     ← shared DB helpers
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── routes/
+│   │   ├── ingest.py             ← POST /api/ingest, DELETE
+│   │   ├── query.py              ← /api/query, /api/query/hybrid, catalog, graph
+│   │   └── graph_rebuild.py      ← POST /api/graph/rebuild
+│   ├── rag_pipeline/
+│   │   ├── prompt_filter.py      ← stage-0 fuzzy file_id ranking
+│   │   ├── form_graph.py         ← graph load + expansion
+│   │   ├── graph_builder.py      ← folder / semantic / tree edge construction
+│   │   ├── tree_text.py          ← outline-augmented query helper
+│   │   ├── page_index.py         ← section tree extraction
+│   │   ├── manifest_io.py
+│   │   └── slug_file_id.py       ← semantic file_id builder
+│   ├── services/
+│   │   ├── chunker.py            ← text splitting
+│   │   └── embeddings.py         ← Sentence Transformers wrapper
+│   └── data/
+│       └── README.md             ← KB ingestion steps (manifest, graph, vector_db)
+├── mcp-server/
+│   ├── README.md                 ← MCP server docs (tool reference)
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── src/
+│       └── main.py               ← FastMCP tools + health routes
 └── admin-portal/                 ← Admin ingest UI
     ├── README.md                 ← admin portal docs (OAuth + deployment)
     ├── app/
@@ -165,7 +163,7 @@ rag-X-mcp-v1/
     └── cloudbuild.yaml
 ```
 
-Each service lives in its **own top-level folder**. There is no nesting of `rag-full` or `admin-portal` inside `backend-full`.
+Each service lives in its **own top-level folder**. There is no nesting of `mcp-server` or `admin-portal` inside `backend`.
 
 ---
 
@@ -185,13 +183,13 @@ Each service lives in its **own top-level folder**. There is no nesting of `rag-
                                │ POST /api/ingest
                                ▼
 ┌─────────────────────┐   REST    ┌─────────────────────┐
-│  MCP client         │◄─────────►│  backend-full/app   │  :8000
+│  MCP client         │◄─────────►│  backend   │  :8000
 │  LibreChat, Cursor  │  + JWT?   │  ChromaDB + graph   │
 └──────────┬──────────┘           └──────────▲──────────┘
            │ MCP HTTP (/mcp)                 │
            ▼                                 │
 ┌─────────────────────┐                      │
-│  rag-full/app       │──────────────────────┘
+│  mcp-server       │──────────────────────┘
 │  FastMCP · :4010    │  search / list / graph tools
 └─────────────────────┘
 ```
@@ -224,7 +222,7 @@ Each service lives in its **own top-level folder**. There is no nesting of `rag-
 | Stage-0 filter | Fast rapidfuzz pass over `file_id` slugs + manifest titles to pick a candidate document set before vector search. |
 | Graph expansion | Walks N hops over typed edges to include related documents in the candidate set. |
 | Hybrid search | Combination of stage-0 + graph expansion + tree hints + vector search. |
-| MCP tool | An endpoint exposed by `rag-full/app` to MCP clients. Backed by backend REST. |
+| MCP tool | An endpoint exposed by `mcp-server` to MCP clients. Backed by backend REST. |
 | JWT (HS256) | Optional shared-secret token between MCP server and backend. |
 
 ---
@@ -248,7 +246,7 @@ Run from the **repository root**. Open **three terminals**, one per service.
 ### 1. RAG backend (terminal 1)
 
 ```bash
-cd backend-full/app
+cd backend
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -280,7 +278,7 @@ Interactive API docs: `http://localhost:8000/docs`
 ### 2. MCP server (terminal 2)
 
 ```bash
-cd rag-full/app
+cd mcp-server
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -399,7 +397,7 @@ If all five steps succeed, the stack is wired up correctly.
 
 LibreChat can call the RAG stack through the MCP service. Keep the service address outside the repository and pass it as an environment variable at runtime.
 
-Use `examples/librechat.rag-mcp.example.yaml` as the sanitized reference file. In an existing `librechat.yaml`, the important pieces are the top-level `mcpServers` block and, optionally, a `modelSpecs` preset for safe system instructions.
+Use `sample-configs/librechat.rag-mcp.example.yaml` as the sanitized reference file. In an existing `librechat.yaml`, the important pieces are the top-level `mcpServers` block and, optionally, a `modelSpecs` preset for safe system instructions.
 
 ```yaml
 mcpServers:
@@ -464,7 +462,7 @@ Save as `docker-compose.yml` at the repository root:
 ```yaml
 services:
   backend:
-    build: ./backend-full/app
+    build: ./backend
     ports: ["8000:8000"]
     volumes:
       - backend-data:/app/vector_db
@@ -473,7 +471,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-}
 
   mcp:
-    build: ./rag-full/app
+    build: ./mcp-server
     ports: ["4010:4010"]
     environment:
       BACKEND_API_URL: http://backend:8000
@@ -529,8 +527,8 @@ The admin portal duplicates a few pipeline helpers from the backend so it can bu
 
 | Admin portal | Backend equivalent |
 |--------------|-------------------|
-| `admin-portal/app/page_index.py` | `backend-full/app/rag_pipeline/page_index.py` |
-| `admin-portal/app/slug_file_id.py` | `backend-full/app/rag_pipeline/slug_file_id.py` |
+| `admin-portal/app/page_index.py` | `backend/rag_pipeline/page_index.py` |
+| `admin-portal/app/slug_file_id.py` | `backend/rag_pipeline/slug_file_id.py` |
 
 When you change document tree building or `file_id` slug logic on the backend, update **both** copies in the same commit. Also keep `FILE_PREFIX` the same on both.
 
@@ -540,8 +538,8 @@ When you change document tree building or `file_id` slug logic on the backend, u
 
 | Component | Detailed docs |
 |-----------|---------------|
-| RAG API (FastAPI) | [backend-full/app/README.md](backend-full/app/README.md) |
-| MCP server (FastMCP) | [rag-full/app/README.md](rag-full/app/README.md) |
+| RAG API (FastAPI) | [backend/README.md](backend/README.md) |
+| MCP server (FastMCP) | [mcp-server/README.md](mcp-server/README.md) |
 | Admin ingest UI | [admin-portal/README.md](admin-portal/README.md) |
 
 ---
@@ -557,7 +555,7 @@ When you change document tree building or `file_id` slug logic on the backend, u
 | Graph | `GET /api/graph`, `GET /api/graph/tree`, `POST /api/graph/rebuild` |
 | Debug | `POST /api/resolve-file-ids` |
 
-Full API reference with payloads: [backend-full/app/README.md](backend-full/app/README.md).
+Full API reference with payloads: [backend/README.md](backend/README.md).
 
 ---
 
@@ -573,7 +571,7 @@ Full API reference with payloads: [backend-full/app/README.md](backend-full/app/
 | `get_document_content` | Full text chunks for one document |
 | `get_form_graph` | Document relationship edges (JSON) |
 
-Tool details: [rag-full/app/README.md](rag-full/app/README.md).
+Tool details: [mcp-server/README.md](mcp-server/README.md).
 
 ---
 
@@ -660,7 +658,7 @@ Specific deploy commands and OAuth configuration live in each component's README
 - **Service folders are siblings** at the repo root. Do not nest one service inside another.
 - **No virtualenvs or build artifacts** committed (see `.gitignore`).
 - **`.env` files are never committed.** Use `.env.example` to document required keys.
-- **Knowledge base setup:** ingest documents, rebuild graph, verify search — [backend-full/app/data/README.md](backend-full/app/data/README.md).
+- **Knowledge base setup:** ingest documents, rebuild graph, verify search — [backend/data/README.md](backend/data/README.md).
 - **READMEs at three levels**:
   - Root → platform overview (this file)
   - Per service → API/tool/UI specifics
@@ -681,7 +679,7 @@ Yes. The backend is fully usable on its own via REST. MCP and admin portal are o
 Yes. Set `EMBEDDINGS_MODEL` to any Hugging Face Sentence Transformers model. Be aware that changing models on an existing vector DB requires re-embedding everything.
 
 **Q: Where do I add custom MCP tools?**
-In `rag-full/app/src/main.py`. Define a function and decorate with `@mcp.tool(...)` from FastMCP.
+In `mcp-server/src/main.py`. Define a function and decorate with `@mcp.tool(...)` from FastMCP.
 
 **Q: How do I delete a document in production?**
 `DELETE /api/documents/{file_id}` is available on the backend but **not** exposed via the admin UI or MCP server. Call it manually after verifying the `file_id`.

@@ -4,9 +4,9 @@ FastAPI service that powers retrieval-augmented generation (RAG) for MCP-style k
 
 Documents are **chunked**, **embedded** with Sentence Transformers, and stored in a local **ChromaDB** vector index. A companion **knowledge graph** links related documents by folder structure, semantic similarity, and shared section outlines. The **hybrid query** endpoint combines fuzzy document filtering, graph expansion, PageIndex tree hints, and vector search into a single retrieval call.
 
-> **Location in repo:** `backend-full/app/` — run all commands below from that directory.
+> **Location in repo:** `backend/` — run all commands below from that directory.
 
-This service is the **source of truth** for the knowledge base. The [MCP server](../../rag-full/app/README.md) calls it for search; the [admin portal](../../admin-portal/README.md) calls it for ingest. Together they form the [RAG MCP Services platform](../../README.md).
+This service is the **source of truth** for the knowledge base. The [MCP server](../mcp-server/README.md) calls it for search; the [admin portal](../admin-portal/README.md) calls it for ingest. Together they form the [RAG X MCP platform](../README.md).
 
 ---
 
@@ -168,7 +168,7 @@ GRAPH_EXPANSION_HOPS=1
 ## Run locally
 
 ```bash
-cd backend-full/app
+cd backend
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -191,7 +191,7 @@ Alternative docs (ReDoc): `http://localhost:8000/redoc`
 The Dockerfile installs **CPU-only PyTorch** first to avoid pulling multi-GB CUDA wheels.
 
 ```bash
-cd backend-full/app
+cd backend
 docker build -t rag-mcp-backend .
 
 docker run -p 8000:8000 \
@@ -369,9 +369,9 @@ curl -X POST http://localhost:8000/api/graph/rebuild \
 
 ## Typical workflow
 
-1. **Ingest** documents via `POST /api/ingest` or the [admin portal](../../admin-portal/README.md) upload UI. Include `display_title`, `relative_path`, and `tree` when available — they make the stage-0 filter and tree-overlap edges far more useful.
+1. **Ingest** documents via `POST /api/ingest` or the [admin portal](../admin-portal/README.md) upload UI. Include `display_title`, `relative_path`, and `tree` when available — they make the stage-0 filter and tree-overlap edges far more useful.
 2. **Rebuild graph** with `POST /api/graph/rebuild` after a bulk ingest (or once a day in production).
-3. **Query** with `POST /api/query/hybrid` for production retrieval, or via [MCP tools](../../rag-full/app/README.md) from LibreChat/Cursor.
+3. **Query** with `POST /api/query/hybrid` for production retrieval, or via [MCP tools](../mcp-server/README.md) from LibreChat/Cursor.
 4. **Inspect** the KB with `GET /api/graph/tree`, `GET /api/documents`, or `POST /api/resolve-file-ids`.
 
 ---
@@ -449,10 +449,10 @@ When deploying to Cloud Run:
 
 ## Related docs
 
-- [Root README](../../README.md) — platform overview (backend + MCP + admin)
-- [MCP server](../../rag-full/app/README.md) — AI client tools
-- [Admin portal](../../admin-portal/README.md) — document upload UI
+- [Root README](../README.md) — platform overview (backend + MCP + admin)
+- [MCP server](../mcp-server/README.md) — AI client tools
+- [Admin portal](../admin-portal/README.md) — document upload UI
 
 ## License
 
-Apache-2.0. See [../../LICENSE](../../LICENSE).
+Apache-2.0. See [../LICENSE](../LICENSE).

@@ -3,7 +3,7 @@
 Bulk-ingest a folder of documents into the RAG backend.
 
 Uses the same extraction, file_id, and PageIndex tree logic as the admin portal UI.
-Run from the admin-portal directory (see data/README.md in backend-full/app).
+Run from the admin-portal directory (see data/README.md in backend).
 """
 from __future__ import annotations
 
@@ -175,7 +175,7 @@ def main() -> int:
 
     print(f"\nDone: {ok} ok, {err} errors, {skip} skipped")
     if ok and not args.dry_run:
-        print("Next: POST /api/graph/rebuild on the backend (see backend-full/app/data/README.md)")
+        print("Next: POST /api/graph/rebuild on the backend (see backend/data/README.md)")
     return 1 if err else 0
 
 

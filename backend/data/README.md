@@ -12,7 +12,7 @@ Runtime files in this folder:
 
 ## Supported document types
 
-Same set for the bulk ingest script and [admin portal](../../../admin-portal/README.md):
+Same set for the bulk ingest script and [admin portal](../../admin-portal/README.md):
 
 | Type | Extensions | How text is obtained |
 |------|------------|----------------------|
@@ -63,7 +63,7 @@ Pipeline: `extract_text` → `build_semantic_file_id` → `build_document_tree` 
 Best for one-off uploads without using the CLI.
 
 1. Start the **backend** (`uvicorn` or Cloud Run).
-2. Start the **admin portal** — [admin-portal/README.md](../../../admin-portal/README.md).
+2. Start the **admin portal** — [admin-portal/README.md](../../admin-portal/README.md).
 3. Set `RAG_BACKEND_URL` to your backend URL.
 4. Sign in (Google OAuth, or `DEV_SKIP_OAUTH=true` locally).
 5. Upload each file (same extraction and ingest pipeline as Way 1).
@@ -126,7 +126,7 @@ curl -X POST "$BACKEND_URL/api/query/hybrid" \
   -d '{ "query": "your question", "k": 4 }'
 ```
 
-Or MCP `search_knowledge_base` — [rag-full/app](../../../rag-full/app/README.md).
+Or MCP `search_knowledge_base` — [mcp-server](../../mcp-server/README.md).
 
 ---
 

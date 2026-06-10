@@ -8,7 +8,7 @@ Users sign in with **Google OAuth** (or skip auth in local dev), upload files, a
 
 > **Location in repo:** `admin-portal/`
 
-Part of [RAG MCP Services](../README.md).
+Part of [RAG X MCP](../README.md).
 
 ---
 
@@ -41,10 +41,10 @@ admin-portal (:8088)     Google OAuth + email allowlist
      │
      │  POST /api/ingest  (server-side HTTP)
      ▼
-backend-full/app (:8000)   ChromaDB + manifest + graph
+backend (:8000)   ChromaDB + manifest + graph
      ▲
      │  search / list tools
-rag-full/app (:4010)       MCP for AI clients
+mcp-server (:4010)       MCP for AI clients
 ```
 
 This portal **only writes** into the knowledge base. It never serves search to end-users — that is the job of the MCP server and the backend's `/api/query/hybrid` endpoint.
@@ -205,7 +205,7 @@ When an admin uploads a file via the UI:
 
 After bulk uploads, run **`POST /api/graph/rebuild`** on the backend to refresh knowledge graph edges.
 
-Full knowledge-base setup (ingest, `vector_db/`, manifest, graph): [backend-full/app/data/README.md](../backend-full/app/data/README.md).
+Full knowledge-base setup (ingest, `vector_db/`, manifest, graph): [backend/data/README.md](../backend/data/README.md).
 
 ---
 
@@ -221,7 +221,7 @@ python scripts/ingest_folder.py --root "C:/path/to/documents" --dry-run
 python scripts/ingest_folder.py --root "C:/path/to/documents"
 ```
 
-Options: `--backend-url`, `--path-prefix`, `--source`, `--dry-run`. See [backend-full/app/data/README.md](../backend-full/app/data/README.md) for supported file types and the graph rebuild step after bulk load.
+Options: `--backend-url`, `--path-prefix`, `--source`, `--dry-run`. See [backend/data/README.md](../backend/data/README.md) for supported file types and the graph rebuild step after bulk load.
 
 ---
 
@@ -356,8 +356,8 @@ On Linux Docker, replace `host.docker.internal` with the backend container name 
 
 When changing RAG ingest behaviour, update **both** copies in the same commit:
 
-- `admin-portal/app/page_index.py` ↔ `backend-full/app/rag_pipeline/page_index.py`
-- `admin-portal/app/slug_file_id.py` ↔ `backend-full/app/rag_pipeline/slug_file_id.py`
+- `admin-portal/app/page_index.py` ↔ `backend/rag_pipeline/page_index.py`
+- `admin-portal/app/slug_file_id.py` ↔ `backend/rag_pipeline/slug_file_id.py`
 
 Also ensure:
 
@@ -386,5 +386,5 @@ If these go out of sync, the admin portal can produce `file_id`s or trees that d
 ## Related docs
 
 - [Root README](../README.md) — full platform overview
-- [Backend README](../backend-full/app/README.md) — ingest API, graph, search
-- [MCP server README](../rag-full/app/README.md) — AI client tools
+- [Backend README](../backend/README.md) — ingest API, graph, search
+- [MCP server README](../mcp-server/README.md) — AI client tools

@@ -1,12 +1,12 @@
 # RAG MCP Server
 
-**FastMCP** server that exposes the RAG knowledge base as **MCP tools** for AI clients (LibreChat, Cursor, Claude Desktop, ChatGPT custom connectors, etc.). Every tool forwards to the FastAPI backend in `backend-full/app` — this service does no embedding or storage of its own.
+**FastMCP** server that exposes the RAG knowledge base as **MCP tools** for AI clients (LibreChat, Cursor, Claude Desktop, ChatGPT custom connectors, etc.). Every tool forwards to the FastAPI backend in `backend` — this service does no embedding or storage of its own.
 
-Documents enter the knowledge base via the [admin portal](../../admin-portal/README.md) or direct `POST /api/ingest` on the backend — this service only **reads** the indexed content.
+Documents enter the knowledge base via the [admin portal](../admin-portal/README.md) or direct `POST /api/ingest` on the backend — this service only **reads** the indexed content.
 
-> **Location in repo:** `rag-full/app/`
+> **Location in repo:** `mcp-server/`
 
-Part of [RAG MCP Services](../../README.md).
+Part of [RAG X MCP](../README.md).
 
 ---
 
@@ -34,11 +34,11 @@ Part of [RAG MCP Services](../../README.md).
 AI client (LibreChat / Cursor / Claude Desktop / MCP host)
         │  MCP HTTP transport (/mcp)
         ▼
-  rag-full/app    ← this service (FastMCP, port 4010)
+  mcp-server    ← this service (FastMCP, port 4010)
         │         ← signs short-lived JWT if JWT_SECRET set
         │  HTTP REST
         ▼
-  backend-full/app   ← RAG API (ChromaDB, graph, ingest)
+  backend   ← RAG API (ChromaDB, graph, ingest)
         ▲
         │  POST /api/ingest
   admin-portal       ← admin uploads (separate from MCP)
@@ -151,10 +151,10 @@ Use the **same `JWT_SECRET`** as the backend when auth is enabled. The MCP serve
 
 ## Run locally
 
-**Prerequisites:** Backend running (see [backend-full/app/README.md](../../backend-full/app/README.md)).
+**Prerequisites:** Backend running (see [backend/README.md](../backend/README.md)).
 
 ```bash
-cd rag-full/app
+cd mcp-server
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -203,7 +203,7 @@ Ensure `BACKEND_API_URL` resolves from the MCP process/container to the running 
 
 ### LibreChat example
 
-See `../../examples/librechat.rag-mcp.example.yaml` for a sanitized reference config. In an existing `librechat.yaml`, add this under the top-level `mcpServers` key:
+See `../sample-configs/librechat.rag-mcp.example.yaml` for a sanitized reference config. In an existing `librechat.yaml`, add this under the top-level `mcpServers` key:
 
 ```yaml
 mcpServers:
@@ -247,7 +247,7 @@ Clients of the MCP server **never** see the JWT — it lives entirely between MC
 ## Docker
 
 ```bash
-cd rag-full/app
+cd mcp-server
 docker build -t rag-mcp-server .
 docker run -p 4010:4010 \
   -e BACKEND_API_URL=http://host.docker.internal:8000 \
@@ -261,21 +261,21 @@ On Linux Docker, replace `host.docker.internal` with the backend container name 
 
 ## Docker Compose (full stack)
 
-See [root README](../../README.md) for a compose file covering backend + MCP + admin portal.
+See [root README](../README.md) for a compose file covering backend + MCP + admin portal.
 
 Minimal backend + MCP:
 
 ```yaml
 services:
   backend:
-    build: ./backend-full/app
+    build: ./backend
     ports: ["8000:8000"]
     volumes:
       - backend-data:/app/vector_db
       - backend-manifest:/app/data
 
   mcp:
-    build: ./rag-full/app
+    build: ./mcp-server
     ports: ["4010:4010"]
     environment:
       BACKEND_API_URL: http://backend:8000
@@ -292,7 +292,7 @@ volumes:
 ## Project structure
 
 ```
-rag-full/app/
+mcp-server/
 ├── Dockerfile
 ├── requirements.txt
 └── src/
@@ -338,6 +338,6 @@ Point LibreChat/MCP clients at the deployed service URL + `/mcp`.
 
 ## Related docs
 
-- [Root README](../../README.md) — platform overview
-- [Backend README](../../backend-full/app/README.md) — API, hybrid pipeline, graph
-- [Admin portal](../../admin-portal/README.md) — document upload (feeds the backend this server reads)
+- [Root README](../README.md) — platform overview
+- [Backend README](../backend/README.md) — API, hybrid pipeline, graph
+- [Admin portal](../admin-portal/README.md) — document upload (feeds the backend this server reads)

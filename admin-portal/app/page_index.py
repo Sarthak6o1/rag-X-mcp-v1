@@ -1,4 +1,4 @@
-"""Mirror of ``backend-full/app/rag_pipeline/page_index.py`` — keep in sync manually (admin-only copy)."""
+"""Mirror of ``backend/rag_pipeline/page_index.py`` — keep in sync manually (admin-only copy)."""
 from __future__ import annotations
 
 import re
