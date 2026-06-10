@@ -1,43 +1,56 @@
-# RAG MCP Services
+# RAG X MCP
 
-Source code for a **Retrieval-Augmented Generation (RAG)** platform with first-class [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) support.
+An MCP-ready **Retrieval-Augmented Generation (RAG)** platform for ingesting documents, building a searchable knowledge base, and exposing retrieval tools to AI clients such as LibreChat through the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
 
-Three independent services work together to **ingest documents**, **index them for search**, and **expose them to AI assistants** as MCP tools. Each service is deployable on its own (typically as a separate Google Cloud Run service) and communicates over plain HTTP.
+The project is organized as three independently deployable services. They communicate over plain HTTP, keep runtime configuration outside source control, and can be run locally with Python or containers.
 
 | Service | Path | Default port | Role |
 |---------|------|--------------|------|
-| **RAG backend** | `backend-full/app/` | `8000` | Index, search, and graph-link documents (FastAPI + ChromaDB) |
-| **MCP server** | `rag-full/app/` | `4010` | Expose the knowledge base as MCP tools for AI assistants |
-| **Admin portal** | `admin-portal/` | `8088` | Admin upload UI → calls backend ingest API |
+| **RAG backend** | `backend-full/app/` | `8000` | FastAPI service for ingestion, embeddings, vector search, and graph expansion |
+| **MCP server** | `rag-full/app/` | `4010` | FastMCP gateway that exposes retrieval tools to AI clients |
+| **Admin portal** | `admin-portal/` | `8088` | Upload UI that extracts document text and calls the backend ingest API |
 
-> **Production:** These services run on **Google Cloud Run** in GCP. This repository is the **source of truth for application code only** — live URLs, secrets, and runtime configuration are managed in Cloud Run + Secret Manager, not in this README.
+> This repository is the **source of truth for application code and sanitized examples only**. Live URLs, credentials, provider keys, OAuth settings, and environment-specific runtime configuration belong in private deployment settings, not in Git.
+
+---
+
+## Key capabilities
+
+- **Document ingestion** through a FastAPI backend and an admin upload portal.
+- **Hybrid retrieval** that combines fuzzy document filtering, graph expansion, section-tree hints, and vector search.
+- **Persistent local knowledge base** using ChromaDB plus JSON manifest/graph artifacts.
+- **MCP tool gateway** so AI clients can query the knowledge base without calling the backend directly.
+- **LibreChat-ready integration** with a sanitized example config and privacy-safe system instructions.
+- **Deployment-conscious design** with environment-driven settings, optional JWT auth, and runtime secrets kept out of Git.
 
 ---
 
 ## Table of contents
 
-1. [What each service does](#what-each-service-does)
-2. [Repository layout](#repository-layout)
-3. [System architecture](#system-architecture)
-4. [Glossary](#glossary)
-5. [Prerequisites](#prerequisites)
-6. [Quick start (local, all three services)](#quick-start-local-all-three-services)
-7. [End-to-end tutorial](#end-to-end-tutorial)
-8. [Service communication](#service-communication)
-9. [Docker Compose (local full stack)](#docker-compose-local-full-stack)
-10. [Authentication and security](#authentication-and-security)
-11. [Shared code sync](#shared-code-sync-important)
-12. [Component documentation](#component-documentation)
-13. [Backend API summary](#backend-api-summary)
-14. [MCP tools summary](#mcp-tools-summary)
-15. [Admin portal summary](#admin-portal-summary)
-16. [Typical workflow](#typical-workflow)
-17. [Production (Cloud Run)](#production-cloud-run)
-18. [Troubleshooting](#troubleshooting)
-19. [Tech stack](#tech-stack)
-20. [Repository conventions](#repository-conventions)
-21. [FAQ](#faq)
-22. [License](#license)
+1. [Key capabilities](#key-capabilities)
+2. [What each service does](#what-each-service-does)
+3. [Repository layout](#repository-layout)
+4. [System architecture](#system-architecture)
+5. [Glossary](#glossary)
+6. [Prerequisites](#prerequisites)
+7. [Quick start (local, all three services)](#quick-start-local-all-three-services)
+8. [End-to-end tutorial](#end-to-end-tutorial)
+9. [LibreChat integration](#librechat-integration)
+10. [Service communication](#service-communication)
+11. [Docker Compose (local full stack)](#docker-compose-local-full-stack)
+12. [Authentication and security](#authentication-and-security)
+13. [Shared code sync](#shared-code-sync-important)
+14. [Component documentation](#component-documentation)
+15. [Backend API summary](#backend-api-summary)
+16. [MCP tools summary](#mcp-tools-summary)
+17. [Admin portal summary](#admin-portal-summary)
+18. [Typical workflow](#typical-workflow)
+19. [Production deployment](#production-deployment)
+20. [Troubleshooting](#troubleshooting)
+21. [Tech stack](#tech-stack)
+22. [Repository conventions](#repository-conventions)
+23. [FAQ](#faq)
+24. [License](#license)
 
 ---
 
@@ -93,9 +106,11 @@ What it does on each upload:
 ## Repository layout
 
 ```
-rag-mcp-services/
+rag-X-mcp-v1/
 ├── README.md                     ← you are here (platform overview)
 ├── .gitignore                    ← repo-wide ignores (.env, .venv, vector_db, etc.)
+├── examples/
+│   └── librechat.rag-mcp.example.yaml
 ├── backend-full/
 │   └── app/                      ← FastAPI RAG API
 │       ├── README.md             ← backend-specific docs (API reference)
@@ -132,7 +147,7 @@ rag-mcp-services/
 │       └── src/
 │           └── main.py           ← FastMCP tools + health routes
 └── admin-portal/                 ← Admin ingest UI
-    ├── README.md                 ← admin portal docs (OAuth + Cloud Run)
+    ├── README.md                 ← admin portal docs (OAuth + deployment)
     ├── app/
     │   ├── main.py               ← FastAPI routes: OAuth, upload, health
     │   ├── config.py
@@ -146,7 +161,7 @@ rag-mcp-services/
     ├── requirements.txt
     ├── Dockerfile
     ├── .env.example
-    ├── deploy-cloud-run.ps1      ← Windows-friendly Cloud Run deploy
+    ├── deploy-cloud-run.ps1      ← optional Cloud Run deploy helper
     └── cloudbuild.yaml
 ```
 
@@ -220,8 +235,8 @@ Each service lives in its **own top-level folder**. There is no nesting of `rag-
 |-------------|-----|
 | **Python 3.11+** | Used by all three services |
 | **~2 GB free disk** | First backend run downloads `all-MiniLM-L6-v2` (~400 MB) and creates ChromaDB |
-| **Docker (optional)** | For containerized local runs and Cloud Run image builds |
-| **Google Cloud account (prod admin)** | OAuth client + Cloud Run deploy |
+| **Docker (optional)** | For containerized local runs and image builds |
+| **Cloud account (optional)** | Needed only for hosted OAuth/deployment workflows |
 | **ffmpeg on PATH (optional)** | Media transcription in admin portal |
 
 ---
@@ -501,8 +516,8 @@ Volumes are critical — without them, ChromaDB embeddings and the manifest/grap
 
 Additional security recommendations:
 
-- **Network**: in production, make the backend reachable only by the MCP server and admin portal (VPC, internal Cloud Run URLs, IAM-restricted ingress).
-- **Secrets**: store `JWT_SECRET`, `SESSION_SECRET`, `GOOGLE_CLIENT_SECRET` in **Secret Manager** and reference them from Cloud Run.
+- **Network**: in production, make the backend reachable only by the MCP server and admin portal.
+- **Secrets**: store `JWT_SECRET`, `SESSION_SECRET`, and OAuth secrets in a managed secret store.
 - **CORS**: backend allows all origins by default for simplicity; lock down in production if exposed to browsers.
 - **Delete endpoint**: `DELETE /api/documents/{file_id}` is intentionally **not** exposed by the MCP server or admin UI — removing production data is an ops action.
 
@@ -570,7 +585,7 @@ Tool details: [rag-full/app/README.md](rag-full/app/README.md).
 | Upload types | `.txt`, `.md`, `.pdf`, `.docx`, `.xlsx`, `.pptx`, `.csv`, `.json`, audio/video |
 | Media | Optional faster-whisper transcription (`TRANSCRIBE_MEDIA=true`, needs ffmpeg) |
 | Pipeline | Extract text → build PageIndex tree + semantic `file_id` → `POST /api/ingest` |
-| Deploy | Cloud Run via `deploy-cloud-run.ps1` or `cloudbuild.yaml` |
+| Deploy | Container deployment via `deploy-cloud-run.ps1` or `cloudbuild.yaml` helpers |
 
 Setup details: [admin-portal/README.md](admin-portal/README.md).
 
@@ -585,26 +600,26 @@ Setup details: [admin-portal/README.md](admin-portal/README.md).
 3. Run `POST /api/graph/rebuild` on the backend.
 4. Query via MCP (`search_knowledge_base`) or directly via `POST /api/query/hybrid`.
 
-### Production (Cloud Run)
+### Production deployment
 
-1. Deploy the **backend** to Cloud Run with persistent storage for `vector_db/` and `data/`.
-2. Deploy the **MCP server** with `BACKEND_API_URL` pointing at the backend URL. Share `JWT_SECRET` between the two via Secret Manager.
-3. Deploy the **admin portal** with Google OAuth credentials and `RAG_BACKEND_URL`.
+1. Deploy the **backend** with persistent storage for `vector_db/` and `data/`.
+2. Deploy the **MCP server** with `BACKEND_API_URL` pointing at the backend URL. Share `JWT_SECRET` between the two through your platform's secret manager.
+3. Deploy the **admin portal** with OAuth credentials and `RAG_BACKEND_URL`.
 4. Wire MCP/LibreChat clients to the deployed MCP service URL + `/mcp`.
 5. Use the admin portal to upload documents; run graph rebuild after bulk ingest.
 
 ---
 
-## Production (Cloud Run)
+## Production deployment
 
 | Concern | Recommendation |
 |---------|----------------|
-| Image registry | Artifact Registry in the same region as Cloud Run |
-| Build | Cloud Build (`cloudbuild.yaml` provided for admin portal) or `gcloud run deploy --source` |
-| Secrets | Secret Manager (`JWT_SECRET`, `SESSION_SECRET`, `GOOGLE_CLIENT_SECRET`) |
-| Storage | Mount/persist `vector_db/` and `data/` (e.g. Cloud Storage FUSE, Filestore, or rebuild-on-deploy if KB is small) |
+| Image registry | Use the registry closest to the runtime platform |
+| Build | Use Docker builds, platform source deploys, or the included `cloudbuild.yaml` helper for the admin portal |
+| Secrets | Store `JWT_SECRET`, `SESSION_SECRET`, and OAuth secrets in a managed secret store |
+| Storage | Mount/persist `vector_db/` and `data/`; rebuild-on-deploy is acceptable only for small demo knowledge bases |
 | Networking | Keep backend access restricted; only the MCP server and admin portal should call it |
-| Logging | Cloud Logging captures structured FastAPI logs |
+| Logging | Send FastAPI and container logs to the platform log sink |
 | Scaling | MCP server can scale freely; backend should be configured for stateful storage |
 
 Specific deploy commands and OAuth configuration live in each component's README.
@@ -636,7 +651,7 @@ Specific deploy commands and OAuth configuration live in each component's README
 | Admin portal | FastAPI, Jinja2, Authlib, httpx, faster-whisper (optional) |
 | Document extraction | pypdf, python-docx, openpyxl, python-pptx |
 | Storage | ChromaDB on disk + JSON manifest/graph files |
-| Deploy | Docker, Google Cloud Run, Artifact Registry, Cloud Build, Secret Manager |
+| Deploy | Docker, managed container platforms, managed secrets, optional helper scripts |
 
 ---
 
@@ -656,8 +671,8 @@ Specific deploy commands and OAuth configuration live in each component's README
 
 ## FAQ
 
-**Q: Why do `mcp_rag` (local dev) and `rag-mcp-services` (this repo) both exist?**
-The local `mcp_rag/` is your dev workspace and may include Docker container exports, virtualenvs, and the ChromaDB state. This repo (`rag-mcp-services`) contains only the application source code — what gets deployed to Cloud Run.
+**Q: What should be committed to this repository?**
+Only application source, documentation, sanitized examples, and deployment templates. Local runtime data, virtual environments, vector databases, real `librechat.yaml` files, credentials, and live service URLs should stay outside Git.
 
 **Q: Can I run only the backend without MCP or admin?**
 Yes. The backend is fully usable on its own via REST. MCP and admin portal are optional add-ons.
@@ -678,4 +693,4 @@ No. Every tool call forwards a fresh HTTP request to the backend. Caching, if ne
 
 ## License
 
-Private repository — all rights reserved unless otherwise specified.
+Apache-2.0. See [LICENSE](LICENSE).

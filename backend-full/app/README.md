@@ -455,4 +455,4 @@ When deploying to Cloud Run:
 
 ## License
 
-Private repository — all rights reserved unless otherwise specified.
+Apache-2.0. See [../../LICENSE](../../LICENSE).
